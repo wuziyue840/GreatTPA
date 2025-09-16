@@ -1,9 +1,9 @@
 name: GreatTPA
-version: '3.5'
+version: '4.2'
 main: xyz.toilet.greatTPA.GreatTPA
 api-version: '1.21'
 authors: [ toilet ]
-description: 伟大的TPA系统，作者：3860603959
+description: 伟大的TPA插件
 commands:
   tpa:
     description: 发送传送请求

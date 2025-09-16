@@ -21,113 +21,101 @@ public class TPARandomTeleportCommand implements CommandExecutor {
       this.plugin = plugin;
    }
 
+   @Override
    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
       if (!(sender instanceof Player)) {
-         sender.sendMessage(this.plugin.getMessage("player-only-command"));
+         sender.sendMessage(plugin.getMessage("player-only-command"));
          return true;
-      } else if (!this.plugin.getConfig().getBoolean("random-teleport.enabled", true)) {
-         sender.sendMessage(this.plugin.getMessage("tpartp-disabled"));
-         return true;
-      } else {
-         Player player = (Player)sender;
-         PlayerData playerData = this.plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
-         if (playerData.isOnCooldown("tpartp")) {
-            long remaining = playerData.getRemainingCooldown("tpartp");
-            player.sendMessage(this.plugin.getMessage("tpartp-cooldown", remaining));
-            return true;
-         } else {
-            // 在施法前获取玩家当前位置
-            Location originalLocation = player.getLocation();
-            int castTime = this.plugin.getConfig().getInt("random-teleport.cast-time", 5);
-
-            // 通知玩家施法开始
-            player.sendMessage(this.plugin.getMessage("tpartp-casting", castTime));
-
-            new BukkitRunnable(){
-               @Override
-               public void run(){
-                  // 施法完成后检查功能是否仍启用
-                  if (!plugin.getConfig().getBoolean("random-teleport.enabled", true)) {
-                     player.sendMessage(plugin.getMessage("tpartp-disabled"));
-                     return;
-                  }
-
-                  // 检查玩家是否仍在游戏中
-                  if (!player.isOnline()) {
-                     return;
-                  }
-
-                  // 重新获取玩家数据（可能已过期）
-                  PlayerData currentPlayerData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
-                  if (currentPlayerData == null) {
-                     player.sendMessage(plugin.getMessage("error-occurred"));
-                     return;
-                  }
-
-                  // 检查冷却状态（防止施法期间其他人设置冷却）
-                  if (currentPlayerData.isOnCooldown("tpartp")) {
-                     long rem = currentPlayerData.getRemainingCooldown("tpartp");
-                     player.sendMessage(plugin.getMessage("tpartp-cooldown", rem));
-                     return;
-                  }
-
-                  // 获取配置参数
-                  int minDistance = plugin.getConfig().getInt("random-teleport.min-distance", 100);
-                  int maxDistance = plugin.getConfig().getInt("random-teleport.max-distance", 500);
-
-                  // 生成随机位置
-                  double angle = random.nextDouble() * 2.0D * Math.PI;
-                  int distance = minDistance + random.nextInt(maxDistance - minDistance + 1);
-
-                  // 使用施法开始时的位置作为起点
-                  Location targetLoc = originalLocation.clone();
-                  targetLoc.add(Math.cos(angle) * distance, 0.0D, Math.sin(angle) * distance);
-
-                  // 寻找安全位置
-                  Location safeLocation = findSafeLocation(targetLoc);
-                  if (safeLocation == null) {
-                     player.sendMessage(plugin.getMessage("teleport-failed"));
-                  } else {
-                     // 执行传送
-                     player.teleport(safeLocation.add(0.5, 0, 0.5)); // 传送到方块中心
-                     player.sendMessage(plugin.getMessage("tpartp-teleported"));
-
-                     // 设置冷却时间（使用当前玩家数据）
-                     currentPlayerData.setCooldown("tpartp");
-                  }
-               }
-            }.runTaskLater(plugin, castTime * 20L);
-
-            return true;
-         }
       }
+
+      Player player = (Player) sender;
+
+      if (!plugin.getConfig().getBoolean("tpartp.enabled", true)) {
+         player.sendMessage(plugin.getMessage("tpartp-disabled"));
+         return true;
+      }
+
+      PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
+
+      if (playerData.isOnCooldown("tpartp_cooldown")) {
+         long remaining = playerData.getRemainingCooldown("tpartp_cooldown");
+         player.sendMessage(plugin.getMessage("tpartp-cooldown", remaining));
+         return true;
+      }
+
+      int tpartpCastTime = plugin.getConfig().getInt("tpartp.cast-time", 5);
+      double tpartpMaxMove = plugin.getConfig().getDouble("tpartp.max-move-distance", 3.0);
+
+      plugin.getCastManager().startCast(player, "tpartp_spell", () -> {
+         if (!plugin.getConfig().getBoolean("tpartp.enabled", true)) {
+            player.sendMessage(plugin.getMessage("tpartp-disabled"));
+            return;
+         }
+
+         // 开始传送等待
+         Runnable teleportRunnable = () -> {
+            performRandomTeleport(player);
+            playerData.setCooldown("tpartp_cooldown");
+         };
+
+         // 开始TPARTP传送等待
+         plugin.getCastManager().startTpartpWait(player, teleportRunnable);
+      }, tpartpCastTime, tpartpMaxMove);
+
+      player.sendMessage(plugin.getMessage("tpartp-start", tpartpCastTime, tpartpMaxMove));
+      return true;
    }
 
-   private Location findSafeLocation(Location location) {
-      World world = location.getWorld();
-      int x = location.getBlockX();
-      int z = location.getBlockZ();
+   private void performRandomTeleport(Player player) {
+      // 获取配置参数
+      int tpartpMinDist = plugin.getConfig().getInt("tpartp.min-distance", 100);
+      int tpartpMaxDist = plugin.getConfig().getInt("tpartp.max-distance", 500);
 
-      // 尝试从世界最高点向下搜索
-      for (int y = world.getMaxHeight() - 1; y > world.getMinHeight(); y--) {
-         Location testLoc = new Location(world, x, y, z);
-         if (this.isSafeLocation(testLoc)) {
-            return testLoc;
+      // 随机生成角度和距离
+      double angle = random.nextDouble() * 2 * Math.PI;
+      int distance = tpartpMinDist + random.nextInt(tpartpMaxDist - tpartpMinDist + 1);
+
+      // 计算目标位置
+      Location currentLoc = player.getLocation();
+      Location targetLoc = currentLoc.clone();
+      targetLoc.add(Math.cos(angle) * distance, 0, Math.sin(angle) * distance);
+
+      // 寻找安全位置:cite[2]
+      Location safeLocation = findSafeLocation(targetLoc);
+      if (safeLocation == null) {
+         player.sendMessage(plugin.getMessage("teleport-failed"));
+         return;
+      }
+
+      // 执行传送:cite[5]:cite[9]
+      player.teleport(safeLocation);
+      player.sendMessage(plugin.getMessage("tpartp-success"));
+   }
+
+   private Location findSafeLocation(Location origin) {
+      World w = origin.getWorld();
+      int x = origin.getBlockX(), z = origin.getBlockZ();
+
+      // 先单柱扫描（快速路径）
+      for (int y = w.getMaxHeight() - 1; y > w.getMinHeight(); y--) {
+         Location loc = new Location(w, x, y, z);
+         if (isSafeLocation(loc)) {
+            return loc.add(0.5, 1, 0.5); // 居中、站在方块上
          }
       }
 
-      // 扩展搜索范围（3x3区域）
-      for (int y = world.getMaxHeight() - 1; y > world.getMinHeight(); y--) {
+      // 再 3×3 扩展（兜底）
+      for (int y = w.getMaxHeight() - 1; y > w.getMinHeight(); y--) {
          for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
-               Location testLoc = new Location(world, x + dx, y, z + dz);
-               if (this.isSafeLocation(testLoc)) {
-                  return testLoc;
+               if (dx == 0 && dz == 0) continue; // 跳过已扫描中心柱
+               Location loc = new Location(w, x + dx, y, z + dz);
+               if (isSafeLocation(loc)) {
+                  return loc.add(0.5, 1, 0.5);
                }
             }
          }
       }
-
       return null;
    }
 
@@ -136,22 +124,16 @@ public class TPARandomTeleportCommand implements CommandExecutor {
       Block feet = loc.clone().add(0, 1, 0).getBlock();
       Block head = loc.clone().add(0, 2, 0).getBlock();
 
-      // 检查危险方块
-      if (isDangerous(ground.getType())) return false;
-
-      // 检查位置是否安全
       return ground.getType().isSolid() &&
-              isPassable(feet.getType()) &&
-              isPassable(head.getType());
+              !isDangerous(ground.getType()) &&
+              feet.isEmpty() &&
+              head.isEmpty();
    }
 
-   private boolean isDangerous(Material material) {
-      String name = material.name();
-      return name.contains("LAVA") ||
-              name.contains("FIRE") ||
-              name.contains("CACTUS") ||
-              name.contains("MAGMA") ||
-              material == Material.SWEET_BERRY_BUSH;
+   private boolean isDangerous(Material m) {
+      return m == Material.LAVA || m == Material.MAGMA_BLOCK ||
+              m == Material.CACTUS || m == Material.FIRE ||
+              m == Material.WATER; // 根据需要增删
    }
 
    private boolean isPassable(Material material) {

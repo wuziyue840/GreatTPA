@@ -18,40 +18,24 @@ public class PlayerListener implements Listener {
 
    @EventHandler
    public void onPlayerMove(PlayerMoveEvent event) {
-      if (event.getFrom().getBlockX() != event.getTo().getBlockX() || event.getFrom().getBlockY() != event.getTo().getBlockY() || event.getFrom().getBlockZ() != event.getTo().getBlockZ()) {
-         this.plugin.getCastManager().checkMovement(event.getPlayer());
-      }
-
+      // 检测玩家是否在施法或等待过程中移动
+      plugin.getCastManager().checkMovement(event.getPlayer());
    }
 
    @EventHandler
    public void onPlayerDeath(PlayerDeathEvent event) {
       Player player = event.getEntity();
-      if (this.plugin.getConfig().getBoolean("back-enabled", true)) {
-         this.plugin.getPlayerDataManager().getPlayerData(player.getUniqueId()).setLastDeathLocation(player.getLocation());
+      if (plugin.getConfig().getBoolean("back-enabled", true)) {
+         plugin.getPlayerDataManager().getPlayerData(player.getUniqueId())
+                 .setLastDeathLocation(player.getLocation());
       }
-
    }
 
    @EventHandler
    public void onPlayerQuit(PlayerQuitEvent event) {
       Player player = event.getPlayer();
-      this.plugin.getCastManager().cancelCast(player.getUniqueId());
-      this.plugin.getRequestManager().clearRequests(player.getUniqueId());
-   }
-
-   @EventHandler
-   public void onPlayerJoin(PlayerJoinEvent event) {
-      Player player = event.getPlayer();
-      RequestManager requestManager = this.plugin.getRequestManager();
-      List<TeleportRequest> requests = requestManager.getRequestsForReceiver(player.getUniqueId());
-      if (requests != null) {
-         long timeout = this.plugin.getConfig().getLong("request-timeout", 30L) * 1000L;
-         long currentTime = System.currentTimeMillis();
-         requests.removeIf((req) -> {
-            return currentTime - req.getTimestamp() > timeout;
-         });
-      }
-
+      plugin.getCastManager().cancelCast(player.getUniqueId());
+      plugin.getCastManager().cancelWait(player.getUniqueId());
+      plugin.getRequestManager().clearRequests(player.getUniqueId());
    }
 }

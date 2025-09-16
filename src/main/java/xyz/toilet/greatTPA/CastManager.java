@@ -9,7 +9,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 public class CastManager {
-   private final Map<UUID, CastManager.CastSession> activeCasts = new ConcurrentHashMap();
+   private final Map<UUID, CastSession> activeCasts = new ConcurrentHashMap<>();
+   private final Map<UUID, WaitSession> activeWaits = new ConcurrentHashMap<>();
    private final GreatTPA plugin;
 
    public CastManager(GreatTPA plugin) {
@@ -17,33 +18,86 @@ public class CastManager {
    }
 
    public void startCast(Player player, String command, Runnable onSuccess) {
-      int castTime = this.plugin.getConfig().getInt("command-settings." + command + ".cast-time", 0);
-      double maxMove = this.plugin.getConfig().getDouble("command-settings." + command + ".max-move-distance", 0.0D);
+      int castTime = plugin.getConfig().getInt("command-settings." + command + ".cast-time", 0);
+      double maxMove = plugin.getConfig().getDouble("command-settings." + command + ".max-move-distance", 0);
+
+      startCast(player, command, onSuccess, castTime, maxMove);
+   }
+
+   public void startCast(Player player, String command, Runnable onSuccess, int castTime, double maxMove) {
       if (castTime <= 0) {
          onSuccess.run();
-      } else {
-         Location startLoc = player.getLocation().clone();
-         CastManager.CastSession session = new CastManager.CastSession(player, command, startLoc, castTime, maxMove, onSuccess);
-         this.activeCasts.put(player.getUniqueId(), session);
-         player.sendMessage(this.plugin.getMessage("casting-start", castTime));
-         session.start();
+         return;
       }
+
+      Location startLoc = player.getLocation().clone();
+      CastSession session = new CastSession(player, command, startLoc, castTime, maxMove, onSuccess);
+      activeCasts.put(player.getUniqueId(), session);
+
+      player.sendMessage(plugin.getMessage("casting-start", castTime));
+      session.start();
+   }
+
+   // 新增：开始传送等待
+   public void startWait(Player player, String command, Runnable onSuccess) {
+      int waitTime = plugin.getConfig().getInt("command-settings." + command + ".wait-time", 0);
+
+      if (waitTime <= 0) {
+         onSuccess.run();
+         return;
+      }
+
+      Location startLoc = player.getLocation().clone();
+      WaitSession session = new WaitSession(player, command, startLoc, waitTime, onSuccess);
+      activeWaits.put(player.getUniqueId(), session);
+
+      player.sendMessage(plugin.getMessage("teleport-waiting", waitTime));
+      session.start();
+   }
+
+   // 新增：开始TPARTP等待
+   public void startTpartpWait(Player player, Runnable onSuccess) {
+      int waitTime = plugin.getConfig().getInt("tpartp.wait-time", 0);
+
+      if (waitTime <= 0) {
+         onSuccess.run();
+         return;
+      }
+
+      Location startLoc = player.getLocation().clone();
+      WaitSession session = new WaitSession(player, "tpartp", startLoc, waitTime, onSuccess);
+      activeWaits.put(player.getUniqueId(), session);
+
+      player.sendMessage(plugin.getMessage("teleport-waiting", waitTime));
+      session.start();
    }
 
    public void cancelCast(UUID playerId) {
-      CastManager.CastSession session = (CastManager.CastSession)this.activeCasts.remove(playerId);
+      CastSession session = activeCasts.remove(playerId);
       if (session != null) {
          session.cancel();
       }
+   }
 
+   public void cancelWait(UUID playerId) {
+      WaitSession session = activeWaits.remove(playerId);
+      if (session != null) {
+         session.cancel();
+      }
    }
 
    public void checkMovement(Player player) {
-      CastManager.CastSession session = (CastManager.CastSession)this.activeCasts.get(player.getUniqueId());
-      if (session != null) {
-         session.checkDistance(player.getLocation());
+      // 检查施法移动
+      CastSession castSession = activeCasts.get(player.getUniqueId());
+      if (castSession != null) {
+         castSession.checkDistance(player.getLocation());
       }
 
+      // 检查等待移动
+      WaitSession waitSession = activeWaits.get(player.getUniqueId());
+      if (waitSession != null) {
+         waitSession.checkDistance(player.getLocation());
+      }
    }
 
    private class CastSession {
@@ -92,6 +146,51 @@ public class CastManager {
             this.player.sendMessage(CastManager.this.plugin.getMessage("casting-cancelled"));
          }
 
+      }
+   }
+
+   // 新增：等待会话类
+   private class WaitSession {
+      private final Player player;
+      private final String command;
+      private final Location startLocation;
+      private final int waitTime;
+      private final Runnable onSuccess;
+      private BukkitTask task;
+
+      public WaitSession(Player player, String command, Location startLocation,
+                         int waitTime, Runnable onSuccess) {
+         this.player = player;
+         this.command = command;
+         this.startLocation = startLocation;
+         this.waitTime = waitTime;
+         this.onSuccess = onSuccess;
+      }
+
+      public void start() {
+         task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (activeWaits.remove(player.getUniqueId()) != null) {
+               player.sendMessage(plugin.getMessage("teleport-waiting-complete"));
+               onSuccess.run();
+            }
+         }, waitTime * 20L);
+      }
+
+      public void checkDistance(Location currentLoc) {
+         if (startLocation.getWorld().equals(currentLoc.getWorld())) {
+            double distance = startLocation.distanceSquared(currentLoc);
+            if (distance > 1.0) { // 移动超过1格就取消
+               cancel();
+               player.sendMessage(plugin.getMessage("teleport-waiting-cancelled"));
+            }
+         }
+      }
+
+      public void cancel() {
+         if (task != null) {
+            task.cancel();
+            activeWaits.remove(player.getUniqueId());
+         }
       }
    }
 }

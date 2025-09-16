@@ -22,7 +22,6 @@ public class GreatTPA extends JavaPlugin {
       this.getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
       this.requestManager.startCleanupTask();
       this.getLogger().info("GreatTPA 插件已启用!");
-      this.getLogger().info("作者QQ：3860603959");
    }
 
    private void createMessagesFile() {
