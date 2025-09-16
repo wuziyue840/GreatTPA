@@ -1,23 +1,29 @@
 # 命令执行时间和施法时可移动距离设置
 command-settings:
   tpa:
-    cast-time: 5
-    max-move-distance: 3.0
+    cast-time: 0  # 施法时间
+    max-move-distance: 3.0  # 施法和等待时允许移动的最大距离
+    wait-time: 3  # 传送等待时间(秒)
   tpahere:
-    cast-time: 5
+    cast-time: 0
     max-move-distance: 3.0
+    wait-time: 3  # 传送等待时间(秒)
   tpaaccept:
-    cast-time: 3
-    max-move-distance: 1.5
+    cast-time: 0
+    max-move-distance: 0
+    wait-time: 0  # 传送等待时间(秒)
   tpadeny:
     cast-time: 0
     max-move-distance: 0
+    wait-time: 0  # 传送等待时间(秒)
   tpacancel:
     cast-time: 0
     max-move-distance: 0
+    wait-time: 0  # 传送等待时间(秒)
   back:
-    cast-time: 5
+    cast-time: 0
     max-move-distance: 2.0
+    wait-time: 3  # 传送等待时间(秒)
 
 # 冷却时间设置（秒）
 cooldowns:
@@ -53,6 +59,7 @@ random-teleport:
   cooldown: 30       # 冷却时间(秒)
   cast-time: 3       # 施法时间(秒)
   max-move-distance: 2.0  # 施法时允许移动的最大距离
+  wait-time: 3  # 传送等待时间(秒)
 
 # back功能
 back-enabled: true

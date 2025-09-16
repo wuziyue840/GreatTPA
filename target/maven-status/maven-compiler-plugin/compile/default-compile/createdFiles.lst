@@ -2,6 +2,7 @@ xyz\toilet\greatTPA\commands\TPAListCommand.class
 xyz\toilet\greatTPA\PlayerDataManager.class
 xyz\toilet\greatTPA\PlayerListener.class
 xyz\toilet\greatTPA\commands\TPAUnblockCommand.class
+xyz\toilet\greatTPA\CastManager$WaitSession.class
 xyz\toilet\greatTPA\commands\TPACommand.class
 xyz\toilet\greatTPA\PlayerData.class
 xyz\toilet\greatTPA\TeleportRequest.class
@@ -17,7 +18,6 @@ xyz\toilet\greatTPA\commands\TPAHelpCommand.class
 xyz\toilet\greatTPA\commands\TPAReloadCommand.class
 xyz\toilet\greatTPA\RequestManager$1.class
 xyz\toilet\greatTPA\commands\TPABlockCommand.class
-xyz\toilet\greatTPA\commands\TPARandomTeleportCommand$1.class
 xyz\toilet\greatTPA\CastManager.class
 xyz\toilet\greatTPA\CastManager$CastSession.class
 xyz\toilet\greatTPA\RequestManager.class
