@@ -1,0 +1,95 @@
+# 施法相关消息
+casting-start: "&e正在施法... 请保持不动 &6{0} &e秒"
+casting-cancelled-move: "&c施法失败！你移动的距离超过了允许范围"
+casting-cancelled: "&c施法已取消"
+
+# 冷却时间消息
+cooldown-message: "&c请等待 &6{0} &c秒后再使用此命令"
+
+# 玩家状态消息
+player-offline: "&c玩家不在线或不存在"
+player-only-command: "&c只有玩家可以使用此命令"
+dimension-mismatch: "&c无法跨维度传送"
+dnd-enabled: "&a已开启免打扰模式，将自动拒绝所有传送请求"
+dnd-disabled: "&a已关闭免打扰模式"
+player-blocked: "&c你已被该玩家屏蔽"
+dnd-active: "&c该玩家已开启免打扰模式"
+cannot-tpa-self: "&c不能向自己发送传送请求"
+
+# 命令用法消息
+tpa-usage: "&c用法: /tpa <玩家>"
+tpahere-usage: "&c用法: /tpahere <玩家>"
+tpaaccept-usage: "&c用法: /tpaaccept [玩家]"
+tpadeny-usage: "&c用法: /tpadeny [玩家]"
+tpacancel-usage: "&c用法: /tpacancel [玩家]"
+tpblock-usage: "&c用法: /tpblock <玩家>"
+tpunblock-usage: "&c用法: /tpunblock <玩家>"
+tpalist-usage: "&c用法: /tpalist"
+
+# TPA 消息
+tpa-sent: "&a已向 &e{0} &a发送传送请求"
+tpa-received: "✨ &e{0} &6请求传送到你身边\n✅ 输入 &a/tpaaccept &6接受\n❌ 输入 &c/tpadeny &6拒绝"
+tpahere-sent: "&a已向 &e{0} &a发送'传送到我'的请求"
+tpahere-received: "✨ &e{0} &6请求你传送到他身边\n✅ 输入 &a/tpaaccept &6接受\n❌ 输入 &c/tpadeny &6拒绝"
+
+# 请求处理消息
+request-accepted: "&a已接受 &e{0} &a的传送请求"
+request-denied: "&c已拒绝 &e{0} &c的传送请求"
+request-cancelled: "&a已取消向 &e{0} &a发送的传送请求"
+request-accepted-by: "&a{0} 接受了你的传送请求"
+request-denied-by: "&c{0} 拒绝了你的传送请求"
+request-cancelled-by: "&c{0} 取消了传送请求"
+no-pending-request: "&c没有待处理的传送请求"
+no-sent-request: "&c没有已发送的传送请求"
+no-request-to-player: "&c没有向 {0} 发送的传送请求"
+request-expired: "&c传送请求已过期"
+teleport-success: "&a传送成功!"
+teleport-failed: "&c传送失败"
+
+# 请求列表消息
+tpalist-title: "&6===== &e待处理的传送请求 &6====="
+tpalist-entry: "&a[{0}] &e{1} &7- {2}"
+tpalist-empty: "&a没有待处理的传送请求"
+tpalist-type-to: "&7(传送到我)"
+tpalist-type-here: "&7(传送到我这里)"
+
+# 屏蔽相关
+player-blocked-success: "&a已屏蔽 &e{0} &a的传送请求"
+player-unblocked-success: "&a已解除对 &e{0} &a的屏蔽"
+already-blocked: "&c该玩家已在屏蔽列表中"
+not-blocked: "&c该玩家不在屏蔽列表中"
+cannot-block-self: "&c不能屏蔽自己"
+
+# 死亡地点
+back-success: "&a已传送至最后一次死亡地点"
+no-death-location: "&c没有可用的死亡地点记录"
+back-disabled: "&c/back 功能已被禁用"
+
+# 随机传送
+tpartp-teleported: "&a已随机传送到新位置!"
+tpartp-usage: "&c用法: /tpartp"
+tpartp-cooldown: "&c请等待 &6{0} &c秒后再使用随机传送"
+tpartp-casting: "&e正在准备随机传送... 请保持不动 &6{0} &e秒"
+tpartp-disabled: "&c随机传送功能已被禁用"
+
+# 帮助信息
+tpa-help: |
+  &6===== &eGreatTPA 帮助 &6=====
+  &a/tpa <玩家> &7- 请求传送到玩家
+  &a/tpahere <玩家> &7- 请求玩家传送到你
+  &a/tpaaccept [玩家] &7- 接受传送请求
+  &a/tpadeny [玩家] &7- 拒绝传送请求
+  &a/tpacancel [玩家] &7- 取消传送请求
+  &a/tpatoggle &7- 切换免打扰模式
+  &a/back &7- 返回死亡地点
+  &a/tpablock <玩家> &7- 屏蔽玩家传送请求
+  &a/tpaunblock <玩家> &7- 解除玩家屏蔽
+  &a/tpalist &7- 查看待处理请求列表
+  &a/tpareload &7- 重载插件配置
+
+# 添加请求过期通知消息
+request-expired-sender: "&c你向 &e{0} &c发送的传送请求已过期"
+
+# 管理员消息
+config-reloaded: "&a配置已重载"
+no-permission: "&c你没有执行此命令的权限"

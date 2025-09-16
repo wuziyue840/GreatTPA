@@ -1,0 +1,33 @@
+name: GreatTPA
+version: '3.5'
+main: xyz.toilet.greatTPA.GreatTPA
+api-version: '1.21'
+authors: [ toilet ]
+description: 伟大的TPA系统，作者：3860603959
+commands:
+  tpa:
+    description: 发送传送请求
+  tpahere:
+    description: 请求玩家传送到自己位置
+  tpaaccept:
+    description: 接受传送请求
+  tpadeny:
+    description: 拒绝传送请求
+  tpacancel:
+    description: 取消传送请求
+  tpatoggle:
+    description: 切换免打扰模式
+  back:
+    description: 返回死亡地点
+  tpablock:
+    description: 屏蔽玩家传送请求
+  tpaunblock:
+    description: 解除玩家屏蔽
+  tpahelp:
+    description: 显示帮助信息
+  tpareload:
+    description: 重载插件配置
+  tpalist:
+    description: 查看待处理的传送请求列表
+  tpartp:
+    description: 随机传送到附近位置

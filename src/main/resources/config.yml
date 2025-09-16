@@ -1,0 +1,61 @@
+# 命令执行时间和施法时可移动距离设置
+command-settings:
+  tpa:
+    cast-time: 5
+    max-move-distance: 3.0
+  tpahere:
+    cast-time: 5
+    max-move-distance: 3.0
+  tpaaccept:
+    cast-time: 3
+    max-move-distance: 1.5
+  tpadeny:
+    cast-time: 0
+    max-move-distance: 0
+  tpacancel:
+    cast-time: 0
+    max-move-distance: 0
+  back:
+    cast-time: 5
+    max-move-distance: 2.0
+
+# 冷却时间设置（秒）
+cooldowns:
+  tpa: 10
+  tpahere: 10
+  tpaaccept: 5
+  back: 30
+
+# 维度检查（是否要求玩家在同一维度）
+dimension-check: true
+
+# 命令别名
+command-aliases:
+  tpa: tpa
+  tpahere: tpahere
+  tpaaccept: tpaaccept
+  tpadeny: tpadeny
+  tpacancel: tpacancel
+  back: back
+  tpatoggle: tpatoggle
+  tpablock: tpablock
+  tpaunblock: tpaunblock
+  tpahelp: tpahelp
+  tpareload: tpareload
+  tpalist: tpalist
+  tpartp: tpartp
+
+# 随机传送相关
+random-teleport:
+  enabled: false     # 是否启用随机传送功能
+  min-distance: 100  # 最小传送距离
+  max-distance: 500  # 最大传送距离
+  cooldown: 30       # 冷却时间(秒)
+  cast-time: 3       # 施法时间(秒)
+  max-move-distance: 2.0  # 施法时允许移动的最大距离
+
+# back功能
+back-enabled: true
+
+# 请求超时时间(秒)
+request-timeout: 30
